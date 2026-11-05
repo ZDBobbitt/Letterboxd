@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111716">
+  <title>Your 50 Most Recent Films, Ranked | Reel Ranked</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #101615;
+      --ink-soft: #151d1b;
+      --panel: #1b2421;
+      --panel-hi: #222e2a;
+      --paper: #f0efe7;
+      --muted: #9da9a1;
+      --line: rgba(233, 238, 223, .12);
+      --mint: #b7e4c8;
+      --lime: #d4ef8d;
+      --orange: #ef9c70;
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(ellipse at 77% 1%, rgba(129, 172, 130, .10), transparent 35rem),
+        radial-gradient(ellipse at 4% 46%, rgba(229, 151, 104, .055), transparent 28rem),
+        var(--ink);
+      color: var(--paper);
+      font-family: var(--sans);
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    a { color: inherit; }
+    .shell { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
+    .topbar {
+      min-height: 78px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { display: inline-flex; align-items: center; gap: 11px; text-decoration: none; }
+    .brand-mark {
+      position: relative; width: 28px; height: 28px; border: 1px solid var(--mint); border-radius: 50%;
+      display: grid; place-items: center; color: var(--mint); font-size: 12px;
+    }
+    .brand-mark::before, .brand-mark::after { content: ""; position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--mint); }
+    .brand-mark::before { top: 2px; left: 10px; box-shadow: 8px 3px 0 var(--mint), 8px 15px 0 var(--mint), 0 18px 0 var(--mint); }
+    .brand-mark::after { top: 10px; left: 2px; box-shadow: 18px 0 0 var(--mint); }
+    .brand-name { font-size: 12px; font-weight: 750; letter-spacing: .18em; text-transform: uppercase; }
+    .brand-name span { color: var(--mint); }
+    .hero {
+      display: grid; grid-template-columns: 1.04fr .96fr; gap: clamp(34px, 7vw, 92px);
+      align-items: center; padding: 83px 0 77px;
+    }
+    h1 { max-width: 650px; margin: 0; font-size: clamp(42px, 5.3vw, 68px); font-weight: 520; letter-spacing: -.075em; line-height: .98; }
+    h1 em { color: var(--mint); font-family: var(--serif); font-weight: 400; letter-spacing: -.09em; }
+    .lookup {
+      position: relative; padding: 25px; border: 1px solid rgba(183, 228, 200, .2); border-radius: 5px;
+      background: linear-gradient(145deg, rgba(37, 52, 45, .82), rgba(24, 32, 29, .94));
+      box-shadow: 0 22px 75px rgba(0, 0, 0, .18);
+    }
+    .lookup::before { content: ""; position: absolute; top: -1px; left: 25px; width: 45px; height: 2px; background: var(--lime); }
+    .field-label { display: block; margin-bottom: 8px; color: #aeb9b1; font: 9px var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+    .input-wrap { display: flex; align-items: center; border: 1px solid rgba(235, 240, 226, .15); border-radius: 3px; background: rgba(7, 12, 10, .3); transition: border-color .2s, box-shadow .2s; }
+    .input-wrap:focus-within { border-color: var(--mint); box-shadow: 0 0 0 3px rgba(183, 228, 200, .08); }
+    .at-sign { padding-left: 14px; color: var(--mint); font: 17px var(--serif); }
+    .text-input { width: 100%; height: 48px; padding: 0 14px 0 8px; border: 0; outline: 0; color: var(--paper); background: transparent; font-size: 13px; }
+    .text-input::placeholder { color: #66726a; }
+    .generate-row { margin-top: 18px; }
+    .submit {
+      width: 100%; height: 46px; display: inline-flex; justify-content: center; align-items: center; gap: 10px;
+      border: 0; border-radius: 3px; background: var(--lime); color: #182018; cursor: pointer;
+      font: 750 10px var(--mono); letter-spacing: .09em; text-transform: uppercase; transition: transform .18s, background .18s;
+    }
+    .submit:hover { background: #e0f5aa; transform: translateY(-1px); }
+    .submit:disabled { cursor: wait; opacity: .75; transform: none; }
+    .submit-arrow { font-size: 16px; font-weight: 400; }
+    .status { min-height: 19px; margin: 13px 0 0; color: var(--mint); font: 11px/1.5 var(--mono); }
+    .status.error { color: #ffab8a; }
+    .status:empty { display: none; }
+
+    .results { padding: 4px 0 90px; }
+    .results[hidden] { display: none; }
+    .results-top { display: flex; justify-content: space-between; align-items: end; gap: 20px; padding: 28px 0 25px; border-bottom: 1px solid var(--line); }
+    .result-title { margin: 8px 0 0; font: 36px var(--serif); letter-spacing: -.04em; }
+    .result-title em { color: var(--mint); font-weight: 400; }
+    .result-meta { margin-top: 8px; color: #8f9c92; font: 10px var(--mono); }
+    .result-actions { display: flex; align-items: center; gap: 16px; }
+    .profile-link { color: var(--mint); font: 9px var(--mono); letter-spacing: .08em; text-decoration: none; text-transform: uppercase; }
+    .profile-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; margin: 20px 0 28px; border: 1px solid var(--line); background: var(--line); }
+    .stat { min-height: 79px; padding: 15px 17px; background: #151c19; }
+    .stat-value { color: var(--paper); font: 23px var(--serif); }
+    .stat-label { margin-top: 7px; color: #819087; font: 8px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .tier-list { display: grid; gap: 11px; }
+    .tier-row { display: grid; grid-template-columns: 169px minmax(0, 1fr); gap: 13px; padding: 17px 0 18px; border-bottom: 1px solid var(--line); }
+    .tier-label { position: relative; padding: 6px 0 0 16px; border-left: 2px solid var(--tier-color, var(--mint)); }
+    .tier-name { color: var(--paper); font: 19px var(--serif); }
+    .tier-rating { margin-top: 7px; color: var(--tier-color, var(--mint)); font: 9px var(--mono); letter-spacing: .09em; text-transform: uppercase; }
+    .tier-count { margin-top: 16px; color: #718077; font: 9px var(--mono); }
+    .unrated-shelf { display: grid; grid-template-columns: 169px minmax(0, 1fr); gap: 13px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+    .unrated-label { padding: 6px 0 0 16px; border-left: 2px solid #a7b0aa; }
+    .unrated-label strong { display: block; color: var(--paper); font: 19px var(--serif); font-weight: 400; }
+    .unrated-label span { display: block; margin-top: 7px; color: #a7b0aa; font: 9px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .poster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 11px; align-content: start; }
+    .poster-card {
+      position: relative; display: block; overflow: hidden; aspect-ratio: 2 / 3; border: 1px solid rgba(240, 239, 231, .08);
+      border-radius: 3px; background: linear-gradient(150deg, #455d51, #25312c 55%, #17211d); color: white; text-decoration: none;
+      box-shadow: 0 9px 17px rgba(0,0,0,.13); isolation: isolate;
+    }
+    .poster-card:nth-child(5n + 2) { background: linear-gradient(150deg, #5f4d3f, #3c3029 55%, #1f1b18); }
+    .poster-card:nth-child(5n + 3) { background: linear-gradient(150deg, #545667, #323443 55%, #1d1f28); }
+    .poster-card:nth-child(5n + 4) { background: linear-gradient(150deg, #73544f, #473431 55%, #241d1b); }
+    .poster-card:nth-child(5n) { background: linear-gradient(150deg, #4b5c66, #2b3d45 55%, #192329); }
+    .poster-card img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s cubic-bezier(.2,.7,.2,1), filter .25s; }
+    .poster-card:hover img, .poster-card:focus-visible img { transform: scale(1.055); filter: saturate(.82); }
+    .poster-shade { position: absolute; z-index: 1; inset: 24% 0 0; background: linear-gradient(transparent, rgba(6, 10, 9, .94)); opacity: .9; transition: opacity .2s; }
+    .poster-title {
+      position: absolute; z-index: 2; right: 8px; bottom: 10px; left: 8px; transform: translateY(5px); opacity: .92;
+      color: #fff; font-size: 10px; font-weight: 680; line-height: 1.3; text-shadow: 0 1px 4px rgba(0,0,0,.4); transition: transform .2s, opacity .2s;
+    }
+    .poster-card:hover .poster-title, .poster-card:focus-visible .poster-title { transform: translateY(0); opacity: 1; }
+    .poster-rating { position: absolute; z-index: 2; top: 7px; right: 7px; padding: 5px 6px; border: 1px solid rgba(255,255,255,.15); border-radius: 2px; color: #fff; background: rgba(9,13,11,.78); font: 9px var(--mono); backdrop-filter: blur(8px); }
+    .poster-card:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+    .poster-card.no-image { display: flex; align-items: center; justify-content: center; padding: 13px; text-align: center; }
+    .poster-card.no-image img { display: none; }
+    .poster-card.no-image .poster-title { position: relative; inset: auto; transform: none; opacity: 1; font: 20px var(--serif); }
+    .empty-result { padding: 42px 20px; border: 1px dashed rgba(240,239,231,.18); color: #a1ada3; text-align: center; font: 11px/1.7 var(--mono); }
+    .empty-result strong { display: block; margin-bottom: 8px; color: var(--paper); font: 24px var(--serif); }
+    .page-footer { padding: 20px 0 30px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 20px; color: #68766d; font: 9px var(--mono); letter-spacing: .04em; }
+
+    @media (max-width: 830px) {
+      .hero { grid-template-columns: 1fr; gap: 38px; padding: 65px 0 55px; }
+      .lookup { max-width: 580px; }
+    }
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 32px, 1180px); }
+      .topbar { min-height: 65px; }
+      .hero { padding: 49px 0 43px; }
+      h1 { font-size: clamp(41px, 11.5vw, 58px); }
+      .lookup { padding: 19px; }
+      .submit { font-size: 9px; }
+      .results-top { align-items: flex-start; flex-direction: column; }
+      .result-title { font-size: 30px; }
+      .result-actions { width: 100%; justify-content: space-between; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat { min-height: 70px; }
+      .tier-row, .unrated-shelf { grid-template-columns: 1fr; gap: 13px; padding-top: 15px; }
+      .tier-label { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 0 0 0 12px; }
+      .tier-name { font-size: 17px; }
+      .tier-rating { margin: 0; text-align: right; }
+      .tier-count { grid-column: 1 / -1; margin-top: 5px; }
+      .unrated-label { padding-left: 12px; }
+      .unrated-label strong { font-size: 17px; }
+      .poster-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 8px; }
+      .poster-title { transform: none; opacity: 1; font-size: 9px; }
+      .page-footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Reel Ranked home">
+        <span class="brand-mark" aria-hidden="true">✳</span>
+        <span class="brand-name">Reel <span>Ranked</span></span>
+      </a>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <h1 id="hero-title">Your 50 Most Recent <em>films, Ranked</em></h1>
+        </div>
+
+        <form class="lookup" id="searchForm">
+          <label class="field-label" for="username">Letterboxd username</label>
+          <div class="input-wrap">
+            <span class="at-sign" aria-hidden="true">@</span>
+            <input class="text-input" id="username" name="username" type="text" placeholder="username" autocomplete="off" required>
+          </div>
+          <div class="generate-row">
+            <button class="submit" id="submitButton" type="submit"><span>Generate</span><span class="submit-arrow" aria-hidden="true">↗</span></button>
+          </div>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="results" id="results" hidden aria-live="polite">
+        <div class="results-top">
+          <div>
+            <h2 class="result-title" id="resultTitle">Recent films</h2>
+            <div class="result-meta" id="resultMeta"></div>
+          </div>
+          <div class="result-actions">
+            <a class="profile-link" id="profileLink" href="#" target="_blank" rel="noreferrer">View profile ↗</a>
+          </div>
+        </div>
+        <div class="stats" id="stats"></div>
+        <div class="tier-list" id="tierList"></div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      <span>REEL RANKED · MADE FOR THE MOVIES</span>
+      <span>POSTER IMAGES © LETTERBOXD / THEIR RESPECTIVE OWNERS</span>
+    </footer>
+  </div>
+
+  <script>
+    const form = document.querySelector("#searchForm");
+    const usernameInput = document.querySelector("#username");
+    const submitButton = document.querySelector("#submitButton");
+    const statusNode = document.querySelector("#status");
+    const resultSection = document.querySelector("#results");
+    let activeEntries = [];
+    let activeUsername = "";
+
+    const tierColors = ["#d4ef8d", "#b7e4c8", "#c4dfad", "#d5dfa0", "#e7d48c", "#e9c18a", "#e7aa81", "#dc9c7e", "#cf917d", "#c58b7f"];
+    const tiers = Array.from({ length: 10 }, (_, index) => {
+      const value = 5 - index * 0.5;
+      return {
+        value,
+        name: `${value.toFixed(1)}-star films`,
+        stars: `${"★".repeat(Math.floor(value))}${value % 1 ? "½" : ""}`,
+        color: tierColors[index],
+        test: (rating) => rating === value
+      };
+    });
+
+    function setStatus(message, isError = false) {
+      statusNode.textContent = message;
+      statusNode.classList.toggle("error", isError);
+    }
+
+    function cleanUsername(value) {
+      const input = value.trim().replace(/^@/, "");
+      if (!/^[A-Za-z0-9_-]{1,32}$/.test(input)) throw new Error("Enter a valid Letterboxd username.");
+      return input;
+    }
+
+    function localField(item, name) {
+      return Array.from(item.getElementsByTagName("*"))
+        .find((node) => node.localName === name)?.textContent?.trim() || "";
+    }
+
+    function safeLetterboxdUrl(value) {
+      try {
+        const url = new URL(value, "https://letterboxd.com");
+        if (url.protocol === "https:" && /(^|\.)letterboxd\.com$/i.test(url.hostname)) return url.href;
+      } catch {}
+      return "https://letterboxd.com/";
+    }
+
+    function safePosterUrl(value) {
+      try {
+        const url = new URL(value, "https://letterboxd.com");
+        if (url.protocol === "https:" && (/(^|\.)ltrbxd\.com$/i.test(url.hostname) || /(^|\.)letterboxd\.com$/i.test(url.hostname))) return url.href;
+      } catch {}
+      return "";
+    }
+
+    function extractPoster(item) {
+      const description = Array.from(item.children).find((node) => node.localName === "description")?.textContent || "";
+      if (!description) return "";
+      const fragment = new DOMParser().parseFromString(description, "text/html");
+      const image = fragment.querySelector("img");
+      return safePosterUrl(image?.getAttribute("src") || image?.getAttribute("data-src") || "");
+    }
+
+    function parseFeed(xmlText) {
+      const xml = new DOMParser().parseFromString(xmlText, "application/xml");
+      if (xml.querySelector("parsererror")) throw new Error("Letterboxd returned an unreadable diary feed.");
+      const entries = [];
+      for (const item of Array.from(xml.getElementsByTagName("item"))) {
+        const guid = item.getElementsByTagName("guid")[0]?.textContent?.trim() || "";
+        if (guid.includes("letterboxd-list-")) continue;
+        const title = localField(item, "filmTitle");
+        if (!title) continue;
+        const watchedDate = localField(item, "watchedDate");
+        if (!watchedDate) continue;
+        const rawRating = localField(item, "memberRating");
+        const numericRating = Number(rawRating);
+        const rating = rawRating && Number.isFinite(numericRating) && numericRating > 0 ? numericRating : null;
+        const releaseYear = Number(localField(item, "filmYear")) || null;
+        const linkText = item.getElementsByTagName("link")[0]?.textContent?.trim() || "";
+        const link = safeLetterboxdUrl(linkText);
+        const record = {
+          title,
+          releaseYear,
+          watchedDate,
+          rating,
+          link,
+          poster: extractPoster(item),
+          rewatch: /yes/i.test(localField(item, "rewatch"))
+        };
+        entries.push(record);
+      }
+      return entries;
+    }
+
+    async function fetchPublicFeed(username) {
+      const feedUrl = `https://letterboxd.com/${encodeURIComponent(username)}/rss/`;
+      const proxyUrl = `https://proxy.cors.dev/${feedUrl}`;
+      const response = await fetch(proxyUrl, {
+        credentials: "omit",
+        headers: { Accept: "application/rss+xml, application/xml, text/xml" }
+      });
+
+      const payload = await response.text();
+      if (!response.ok) {
+        let reason = response.headers.get("X-Cors-Error") || `Feed request failed (${response.status}).`;
+        try { reason = JSON.parse(payload).error || reason; } catch {}
+        throw new Error(reason);
+      }
+      if (!payload.includes("<rss") && !payload.includes(":rss")) {
+        throw new Error("The feed response was not readable. Try opening the app with node server.mjs.");
+      }
+      return payload;
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+
+    function ratingLabel(value) {
+      return value === null ? "Unrated" : `${value.toFixed(1)} ★`;
+    }
+
+    function posterMarkup(movie, index) {
+      const title = escapeHtml(movie.title);
+      const poster = movie.poster ? escapeHtml(movie.poster) : "";
+      const href = escapeHtml(movie.link);
+      const rating = movie.rating === null ? "—" : movie.rating.toFixed(1);
+      const label = `${movie.title}${movie.releaseYear ? ` (${movie.releaseYear})` : ""}; ${ratingLabel(movie.rating)}; watched ${movie.watchedDate}${movie.rewatch ? "; rewatch" : ""}`;
+      return `<a class="poster-card ${poster ? "" : "no-image"}" href="${href}" target="_blank" rel="noreferrer" aria-label="${escapeHtml(label)}" style="--poster-index:${index}">
+        ${poster ? `<img src="${poster}" alt="" loading="lazy" referrerpolicy="no-referrer">` : ""}
+        <span class="poster-shade" aria-hidden="true"></span>
+        <span class="poster-title">${title}${movie.releaseYear ? `<span style="display:block;margin-top:3px;font-size:9px;font-weight:450;opacity:.75">${movie.releaseYear}</span>` : ""}</span>
+        <span class="poster-rating">${rating}</span>
+      </a>`;
+    }
+
+    function render() {
+      const rated = activeEntries.filter((entry) => entry.rating !== null);
+      const avg = rated.length ? rated.reduce((sum, entry) => sum + entry.rating, 0) / rated.length : null;
+      const rewatches = activeEntries.filter((entry) => entry.rewatch).length;
+      const unrated = activeEntries.filter((entry) => entry.rating === null).length;
+      document.querySelector("#resultTitle").innerHTML = `${escapeHtml(activeUsername)}’s <em>recent films</em>`;
+      document.querySelector("#resultMeta").textContent = `${activeEntries.length} most recent diary entr${activeEntries.length === 1 ? "y" : "ies"}`;
+      document.querySelector("#profileLink").href = `https://letterboxd.com/${encodeURIComponent(activeUsername)}/`;
+      document.querySelector("#stats").innerHTML = [
+        [activeEntries.length, "Recent watches"],
+        [avg === null ? "—" : `${avg.toFixed(1)} ★`, "Average rating"],
+        [rewatches, "Rewatches"],
+        [unrated, "Without a rating"]
+      ].map(([value, label]) => `<div class="stat"><div class="stat-value">${escapeHtml(value)}</div><div class="stat-label">${escapeHtml(label)}</div></div>`).join("");
+
+      const list = document.querySelector("#tierList");
+      if (!activeEntries.length) {
+        list.innerHTML = `<div class="empty-result"><strong>No recent diary entries found.</strong>This profile’s public feed may be empty or unavailable.</div>`;
+        return;
+      }
+      const ratedRows = tiers.map((tier) => {
+        const group = activeEntries.filter((entry) => tier.test(entry.rating));
+        return `<section class="tier-row" style="--tier-color:${tier.color}" aria-label="${tier.value.toFixed(1)} star films">
+          <div class="tier-label"><div class="tier-name">${tier.name}</div><div class="tier-rating">${tier.stars}</div><div class="tier-count">${group.length} film${group.length === 1 ? "" : "s"}</div></div>
+          <div class="poster-grid">${group.map((movie, index) => posterMarkup(movie, index)).join("")}</div>
+        </section>`;
+      }).join("");
+      const unratedEntries = activeEntries.filter((entry) => entry.rating === null);
+      const unratedShelf = unratedEntries.length ? `<section class="unrated-shelf" aria-label="Unrated films">
+        <div class="unrated-label"><strong>Unrated films</strong><span>${unratedEntries.length} without a rating</span></div>
+        <div class="poster-grid">${unratedEntries.map((movie, index) => posterMarkup(movie, index)).join("")}</div>
+      </section>` : "";
+      list.innerHTML = ratedRows + unratedShelf;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      resultSection.hidden = true;
+      let username;
+      try {
+        username = cleanUsername(usernameInput.value);
+      } catch (error) {
+        setStatus(error.message, true);
+        return;
+      }
+      submitButton.disabled = true;
+      submitButton.querySelector("span:first-child").textContent = "Generating…";
+      setStatus(`Reading @${username}’s public diary…`);
+      try {
+        const payload = await fetchPublicFeed(username);
+        activeEntries = parseFeed(payload);
+        activeUsername = username;
+        render();
+        resultSection.hidden = false;
+        setStatus(activeEntries.length ? `Found ${activeEntries.length} recent diary entr${activeEntries.length === 1 ? "y" : "ies"}.` : "No recent diary entries found.");
+        resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (error) {
+        const message = error instanceof TypeError && error.message === "Failed to fetch"
+          ? "Could not reach the public RSS bridge. Check your connection or try again later."
+          : error.message || "Could not load this Letterboxd feed. Try again in a moment.";
+        setStatus(message, true);
+      } finally {
+        submitButton.disabled = false;
+        submitButton.querySelector("span:first-child").textContent = "Generate";
+      }
+    });
+
+  </script>
+</body>
+</html>
